@@ -9,3 +9,4 @@
 The plugin starts automatically along with IDA.
 You can stop/start the plugin with **Ctrl+Alt+D**.
 The RPC looks like this:
+<img width="447" height="159" alt="preview" src="https://github.com/user-attachments/assets/ce58be2b-8326-4d6d-a3d0-b916ea7ebbc3" />
