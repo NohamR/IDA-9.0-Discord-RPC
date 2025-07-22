@@ -4,6 +4,7 @@ import ida_funcs
 import ida_name
 import ida_nalt
 import time
+import cxxfilt
 from pypresence import Presence
 
 PLUGIN_NAME = "Discord RPC for IDA"
@@ -12,7 +13,7 @@ PLUGIN_COMMENT = "Display IDA status in Discord"
 PLUGIN_HELP = "This plugin updates your Discord status with IDA information"
 PLUGIN_VERSION = "1.0"
 
-CLIENT_ID = "1274210451273551973"
+CLIENT_ID = "1396262435471491112"
 THROTTLE_TIME = 5  # Minimum time between updates in seconds
 
 class DiscordRPCPlugin(ida_idaapi.plugin_t):
@@ -84,6 +85,18 @@ class DiscordRPCPlugin(ida_idaapi.plugin_t):
         self.update_pending = False
         self._perform_update()
         return -1  # Unregister the timer
+    
+    def sanitize_func_name(self, func_name):
+        """Sanitize function names to avoid issues with Discord presence (max 128 chars for state)."""
+        if not func_name:
+            func_name = "Unknown"
+        # Parse C++ mangled symbol into human-readable name
+        func_name = cxxfilt.demangle(func_name)
+        prefix = "Function: "
+        max_func_len = 128 - len(prefix)
+        if len(func_name) > max_func_len:
+            func_name = func_name[:max_func_len]
+        return func_name
 
     def _perform_update(self):
         try:
@@ -99,9 +112,9 @@ class DiscordRPCPlugin(ida_idaapi.plugin_t):
 
                 self.rpc.update(
                     details=f"Analyzing: {file_name}",
-                    state=f"Function: {func_name}",
+                    state=f"Function: {self.sanitize_func_name(func_name)}",
                     large_image="ida_logo",
-                    large_text="IDA Pro 9.0",
+                    large_text="IDA Pro 9.1",
                     start=self.start_time
                 )
                 self.last_update_time = time.time()
